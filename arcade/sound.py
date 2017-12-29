@@ -6,6 +6,7 @@ Small abstraction around the sound library.
 
 import pyglet
 import typing
+import simpleaudio
 
 # pyglet.lib.load_library('C:/Program Files/Python36/Lib/site-packages/arcade/Win32/avbin')
 # pyglet.have_avbin=True
@@ -70,8 +71,17 @@ def load_sound(filename: str) -> typing.Any:
     Load a sound and get it ready to play.
     """
 
-    load_sound_library()
-    source = pyglet.media.load(filename, streaming=False)
+    source = None
+
+    if filename.endswith(".wav"):
+        source = simpleaudio.WaveObject.from_wave_file(filename)
+    else:
+        try:
+            load_sound_library()
+            source = pyglet.media.load(filename, streaming=False)
+        except:
+            print(f"Warning, unable to load sound file '{filename}'.")
+
     return source
 
 
@@ -79,6 +89,12 @@ def play_sound(sound: typing.Any):
     """
     Play a previously loaded sound.
     """
+    if sound is None:
+        print("Warning, unable to play sound. Sound not set up properly.")
+        return
 
-    load_sound_library()
-    sound.play()
+    if type(sound) is simpleaudio.shiny.WaveObject:
+        sound.play()
+    else:
+        load_sound_library()
+        sound.play()
